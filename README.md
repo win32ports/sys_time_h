@@ -9,3 +9,6 @@ tested on the following compilers:
 
 defines the following structures:
 - timeval
+
+implements the following functions:
+- gettimeofday
