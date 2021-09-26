@@ -37,6 +37,48 @@ extern "C" {
 #include <Winsock2.h> /* timeval */
 #endif /* !defined(_WINSOCK2API_) && !defined(_WINSOCKAPI_) */
 
+#include <stdint.h>
+
+struct timezone
+{
+	int tz_minuteswest;
+	int tz_dsttime;
+};
+
+static int gettimeofday(struct timeval *tp, struct timezone *tzp)
+{
+	typedef void (__stdcall * pfnGetSystemTimePreciseAsFileTime)(LPFILETIME lpSystemTimeAsFileTime);
+	HANDLE hKernel32 = GetModuleHandleW(L"kernel32.dll");
+	pfnGetSystemTimePreciseAsFileTime fnGetSystemTimePreciseAsFileTime = (pfnGetSystemTimePreciseAsFileTime) GetProcAddress(hKernel32, "GetSystemTimePreciseAsFileTime");
+	FILETIME time;
+
+	if (fnGetSystemTimePreciseAsFileTime)
+		fnGetSystemTimePreciseAsFileTime(&time);
+	else
+		GetSystemTimeAsFileTime(&time);
+
+	uint64_t time64 = ((uint64_t)time.dwHighDateTime << 32) | time.dwLowDateTime;
+	time64 = (time64 / 10 - 11644473600ULL * 1000000ULL);
+
+	if (tp)
+	{
+		tp->tv_sec = (long) (time64 / 1000000ULL);
+		tp->tv_usec = (long) (time64 % 1000000ULL);
+	}
+	if (tzp)
+	{
+		/* The use of the timezone structure is obsolete; the tz argument should normally be specified as NULL. */
+		TIME_ZONE_INFORMATION tzi;
+		GetTimeZoneInformation(&tzi);
+
+		tzp->tz_minuteswest = tzi.Bias;
+		tzp->tz_dsttime = 0;
+	}
+
+	/* The gettimeofday() function returns 0 and no value is reserved to indicate an error. */
+	return 0;
+}
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
