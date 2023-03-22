@@ -48,8 +48,8 @@ struct timezone
 static int gettimeofday(struct timeval *tp, struct timezone *tzp)
 {
 	typedef void (__stdcall * pfnGetSystemTimePreciseAsFileTime)(LPFILETIME lpSystemTimeAsFileTime);
-	HMODULE hKernel32;
-	pfnGetSystemTimePreciseAsFileTime fnGetSystemTimePreciseAsFileTime;
+	HMODULE hKernel32 = NULL;
+	pfnGetSystemTimePreciseAsFileTime fnGetSystemTimePreciseAsFileTime = NULL;
 	FILETIME time;
 	hKernel32 = GetModuleHandleW(L"kernel32.dll");
 	if (hKernel32)
