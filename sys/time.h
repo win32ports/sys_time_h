@@ -52,13 +52,13 @@ static int gettimeofday(struct timeval *tp, struct timezone *tzp)
 	pfnGetSystemTimePreciseAsFileTime fnGetSystemTimePreciseAsFileTime = NULL;
 	FILETIME time;
 	hKernel32 = GetModuleHandleW(L"kernel32.dll");
-#if defined(__GNUC__)
+#if defined(__GNUC__) && (__GNUC__ == 8)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-function-type"
 #endif
 	if (hKernel32)
 		fnGetSystemTimePreciseAsFileTime = (pfnGetSystemTimePreciseAsFileTime) GetProcAddress(hKernel32, "GetSystemTimePreciseAsFileTime");
-#if defined(__GNUC__)
+#if defined(__GNUC__) && (__GNUC__ == 8)
 #pragma GCC diagnostic pop
 #endif
 
